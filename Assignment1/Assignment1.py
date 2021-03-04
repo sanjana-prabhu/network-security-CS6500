@@ -117,9 +117,10 @@ def randomness(output_len, counter_len, xored_output): # Function to find the ra
 
 
     std_dev = np.std(counter)
-    #print(counter) # Uncomment this to check how the counter looks at any interval
+    no_samples = output_len - 7
+    print(counter) # Uncomment this to check how the counter looks at any interval
     
-    return (std_dev*counter_len)/output_len
+    return (std_dev*counter_len)/no_samples
 
 def xor_func(random_key_stream1, random_key_stream2): # Function to XOR two bitstreams
 
