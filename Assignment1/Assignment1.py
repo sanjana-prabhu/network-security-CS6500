@@ -118,7 +118,7 @@ def randomness(output_len, counter_len, xored_output): # Function to find the ra
 
     std_dev = np.std(counter)
     no_samples = output_len - 7
-    print(counter) # Uncomment this to check how the counter looks at any interval
+    #print(counter) # Uncomment this to check how the counter looks at any interval
     
     return (std_dev*counter_len)/no_samples
 
@@ -158,13 +158,13 @@ def bin2dec(bin_array): # Function to convert a 8 bit binary to a decimal number
     
     return number
 
-## Main code starts here
+# Main code starts here #
 
 output_len_array = [2,4,8,32,128,1024]
 
 toggle_bits = 32
 
-iterations = 100
+iterations = 50
 
 standard_dev = np.zeros([len(output_len_array), toggle_bits])
 
@@ -198,11 +198,8 @@ for i in range(len(output_len_array)):
 
     standard_dev[i,j] = sum_stddev/iterations
 
-    #print(i,j)
+# Plots
 
-#print(standard_dev)
-
-## Plots
 X = np.linspace(1, 32, 32)
 
 plt.plot(X, standard_dev[0,:])
