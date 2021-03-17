@@ -69,7 +69,7 @@ def create_mail(SecType, Sender, Receiver, EmailInputFile, EmailOutputFile, Dige
 	private_key = serialization.load_pem_private_key(key_file2.read(),None, backend=default_backend())
 			
 	email_message = f1.read()
-	email_message = bytes(email_message, 'utf-8')
+	
 
 	if SecType == "CONF":
 
@@ -82,6 +82,8 @@ def create_mail(SecType, Sender, Receiver, EmailInputFile, EmailOutputFile, Dige
 
 	elif SecType == "AUIN":
 
+		email_message = bytes(email_message, 'utf-8')
+
 		hash_string, encrypted_hash = hash_and_sign(email_message, private_key, DigestAlg)
 
 		f2.write(encrypted_hash+b"\n")
@@ -89,15 +91,12 @@ def create_mail(SecType, Sender, Receiver, EmailInputFile, EmailOutputFile, Dige
 
 	elif SecType == "COAI":
 
-		hash_string, encrypted_hash = hash_and_sign(email_message, private_key, DigestAlg)
 
-		message = b"".join([encrypted_hash, email_message])
+		hash_string, encrypted_hash = hash_and_sign(bytes(email_message, 'utf-8'), private_key, DigestAlg)
 
-		hashing_key = os.urandom(int(len(encrypted_hash)/8))
+		message = b"".join([(encrypted_hash), bytes(email_message, 'utf-8')])
 
-		ciphertext, key = encrypt_message(message, EncryAlg)
-
-		key = b"".join([key, hashing_key])
+		ciphertext, key = encrypt_message(message.decode("utf-8"), EncryAlg)
 
 		encrypted_key = RSA_encrypt(public_key, key)
 		
@@ -137,19 +136,24 @@ def read_mail(SecType, Sender, Receiver, SecureInputFile, PlainTextOutputFile, D
 
 		encrypted_key = f1.readline()
 		encrypted_key = encrypted_key[0:len(encrypted_key)-1]
-		encrypted_message = f1.readline()
+		encrypted_message = f1.readlines()
+		
 
 		decrypted_key = RSA_decrypt(private_key, encrypted_key)
 		
-		f2.write(decrypt_message(decrypted_key, encrypted_message, EncryAlg))
+		f2.write(unpad(decrypt_message(decrypted_key, encrypted_message, EncryAlg)))
 
 	elif SecType == "AUIN":
 
 		encrypted_hash = f1.readline()
 		encrypted_hash = encrypted_hash[0:len(encrypted_hash)-1]
 
-		message = f1.readline()
-		verify_match(message, public_key, encrypted_hash, DigestAlg)
+		message = f1.readlines()
+		message_concatenated = b""
+		for i in range(len(message)):
+			message_concatenated = b"".join([message_concatenated, message[i]])
+
+		verify_match(message_concatenated, public_key, encrypted_hash, DigestAlg)
 
 		return "The integrity of the sender has been validated."
 		
@@ -161,15 +165,9 @@ def read_mail(SecType, Sender, Receiver, SecureInputFile, PlainTextOutputFile, D
 
 		decrypted_key = RSA_decrypt(private_key, encrypted_key)
 
-		if EncryAlg == "aes-256-cbc":
-			hash_length = 8*(len(decrypted_key) - 48)
-		else:
-			hash_length = 8*(len(decrypted_key) - 24)
-			print(hash_length)
-
-		temp = decrypt_message(decrypted_key, encrypted_message, EncryAlg)
-		message = temp[hash_length:]
-		encrypted_hash = temp[:hash_length]
+		temp = unpad(decrypt_message(decrypted_key, encrypted_message, EncryAlg))
+		message = temp[344:]
+		encrypted_hash = temp[:344]
 		verify_match(message, public_key, encrypted_hash, DigestAlg)
 
 		f2.write(message)
@@ -190,6 +188,13 @@ def RSA_decrypt(private_key, encrypted_message):
 
 	return private_key.decrypt(base64.b64decode(encrypted_message),padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None))
 
+def pad(s, block_size):
+
+	return s + (block_size - len(s) % block_size)*chr(block_size - len(s) % block_size)
+
+def unpad(s):
+
+	return s[:-ord(s[len(s)-1:])]
 
 def encrypt_message(email_message, EncryAlg):
 
@@ -198,7 +203,8 @@ def encrypt_message(email_message, EncryAlg):
 		session_key = os.urandom(32)
 		iv = os.urandom(16)
 		key = b"".join([session_key, iv])
-
+		email_message = pad(email_message, 16)
+		email_message = bytes(email_message, 'utf-8')
 		cipher = Cipher(algorithms.AES(session_key), modes.CBC(iv))
 		encryptor = cipher.encryptor()
 		ciphertext = base64.b64encode(encryptor.update(email_message) + encryptor.finalize())
@@ -208,7 +214,8 @@ def encrypt_message(email_message, EncryAlg):
 		session_key = os.urandom(16)
 		iv = os.urandom(8)
 		key = b"".join([session_key, iv])
-
+		email_message = pad(email_message, 8)
+		email_message = bytes(email_message, 'utf-8')
 		cipher = Cipher(algorithms.TripleDES(session_key), modes.CBC(iv))
 		encryptor = cipher.encryptor()
 		ciphertext = base64.b64encode(encryptor.update(email_message) + encryptor.finalize())
@@ -246,7 +253,6 @@ def hash_and_sign(email_message, private_key, DigestAlg):
 	if DigestAlg == "sha512":
 		hash_string = hashlib.sha512(email_message).hexdigest()
 		encrypted_hash = base64.b64encode(private_key.sign(bytes(hash_string.encode('ascii')),padding.PSS(mgf=padding.MGF1(hashes.SHA512()),salt_length=padding.PSS.MAX_LENGTH),hashes.SHA512()))
-			
 	else:
 		hash_string = hashlib.sha3_512(email_message).hexdigest()
 		encrypted_hash = base64.b64encode(private_key.sign(bytes(hash_string.encode('ascii')),padding.PSS(mgf=padding.MGF1(hashes.SHA3_512()),salt_length=padding.PSS.MAX_LENGTH),hashes.SHA3_512()))
@@ -257,7 +263,10 @@ def hash_and_sign(email_message, private_key, DigestAlg):
 def verify_match(message, public_key, encrypted_hash, DigestAlg):
 
 	if DigestAlg == "sha512":
+		print(message)
+
 		hash_string = hashlib.sha512(message).hexdigest()
+		print(hash_string)
 		mgf = padding.MGF1(hashes.SHA512())
 		algorithm = hashes.SHA512()
 	else:
