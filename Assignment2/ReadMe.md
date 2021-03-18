@@ -1,4 +1,5 @@
 All the scripts are in Python.
+
 Dependencies : cryptography
 
 The script file test.sh tests out all the 3 security services for various Digest algorithms and encryption algorithms and can handle RSA key sizes of 1024, 2048.
@@ -18,4 +19,5 @@ python3 Assignment2.py CreateKeys Usernames.txt RSAKeySize
 To test out any individual security mechanism, use the commands :
 
 python3 Assignment2.py CreateMail SecType Sender Receiver EmailInputFile EmailOutputFile DigestAlg EncryAlg RSAKeySize
+
 python3 Assignment2.py ReadMail SecType Sender Receiver SecureInputFile PlainTextOutputFile DigestAlg EncryAlg RSAKeySize
