@@ -1,0 +1,11 @@
+Hello,
+
+This is a sample mail. It contains various characters $%!!
+As well as newlines....
+
+
+And spaces!
+
+For successful email configuration, the same mail must be present in the Mail-decrypt.txt file.
+
+Bye!

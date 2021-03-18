@@ -70,7 +70,6 @@ def create_mail(SecType, Sender, Receiver, EmailInputFile, EmailOutputFile, Dige
 			
 	email_message = f1.read()
 	
-
 	if SecType == "CONF":
 
 		ciphertext, key = encrypt_message(email_message, EncryAlg)
@@ -95,7 +94,7 @@ def create_mail(SecType, Sender, Receiver, EmailInputFile, EmailOutputFile, Dige
 		hash_string, encrypted_hash = hash_and_sign(bytes(email_message, 'utf-8'), private_key, DigestAlg)
 
 		message = b"".join([(encrypted_hash), bytes(email_message, 'utf-8')])
-
+		
 		ciphertext, key = encrypt_message(message.decode("utf-8"), EncryAlg)
 
 		encrypted_key = RSA_encrypt(public_key, key)
@@ -130,14 +129,12 @@ def read_mail(SecType, Sender, Receiver, SecureInputFile, PlainTextOutputFile, D
 
 	private_key = serialization.load_pem_private_key(key_file1.read(),None,backend=default_backend())
 	public_key = serialization.load_pem_public_key(key_file2.read(),backend=default_backend())
-
-			
+	
 	if SecType == "CONF":
 
 		encrypted_key = f1.readline()
 		encrypted_key = encrypted_key[0:len(encrypted_key)-1]
-		encrypted_message = f1.readlines()
-		
+		encrypted_message = f1.readline()
 
 		decrypted_key = RSA_decrypt(private_key, encrypted_key)
 		
@@ -162,12 +159,13 @@ def read_mail(SecType, Sender, Receiver, SecureInputFile, PlainTextOutputFile, D
 		encrypted_key = f1.readline()
 		encrypted_key = encrypted_key[0:len(encrypted_key)-1]
 		encrypted_message = f1.readline()
+		hash_len = int((int(RSAKeySize)/1024) * 172)
 
 		decrypted_key = RSA_decrypt(private_key, encrypted_key)
 
 		temp = unpad(decrypt_message(decrypted_key, encrypted_message, EncryAlg))
-		message = temp[344:]
-		encrypted_hash = temp[:344]
+		message = temp[hash_len:]
+		encrypted_hash = temp[:hash_len]
 		verify_match(message, public_key, encrypted_hash, DigestAlg)
 
 		f2.write(message)
@@ -176,7 +174,7 @@ def read_mail(SecType, Sender, Receiver, SecureInputFile, PlainTextOutputFile, D
 	f1.close()
 	f2.close()
 	
-	return "Mail has been read from " + SecureInputFile
+	return "Mail has been read to " + PlainTextOutputFile +" from " + SecureInputFile
 
 
 def RSA_encrypt(public_key, message):
@@ -263,10 +261,7 @@ def hash_and_sign(email_message, private_key, DigestAlg):
 def verify_match(message, public_key, encrypted_hash, DigestAlg):
 
 	if DigestAlg == "sha512":
-		print(message)
-
 		hash_string = hashlib.sha512(message).hexdigest()
-		print(hash_string)
 		mgf = padding.MGF1(hashes.SHA512())
 		algorithm = hashes.SHA512()
 	else:
@@ -286,7 +281,6 @@ def verify_match(message, public_key, encrypted_hash, DigestAlg):
 		print('Oops! Invalid credentials.')
 		sys.exit(1)
 
-	
 
 if sys.argv[1] == "CreateKeys":
 
