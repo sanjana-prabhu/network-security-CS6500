@@ -39,6 +39,7 @@ def create_keys(file_name, rsa_key_len):
 		f2.write(public_key_bytes) 
 
 	f.close()
+	
 	f1.close()
 	f2.close()
 
