@@ -1,6 +1,7 @@
 All the scripts are in Python.
 
-Dependencies : cryptography
+### Dependencies :
+- cryptography
 
 The script file test.sh tests out all the 3 security services for various Digest algorithms and encryption algorithms and can handle RSA key sizes of 1024, 2048.
 
@@ -9,8 +10,9 @@ Note : The sample mail and Usernames.txt files are present in the folder. Please
 For every security service, the mail is stored in Mail-sample.txt, the output of CreateMail is stored in Mail-out.txt and the read mail is stored in Mail-decrypt.txt.
 
 Run the script file using :
-
+...
 bash test.sh
+... 
 
 To generate RSA keys for usernames stored in Usernames.txt use the following command:
 
