@@ -2,7 +2,7 @@ All the scripts are in Python. The script file test.sh tests out all the 3 secur
 
 
 ### Dependencies :
-- cryptography
+- cryptography>=3.46
 
 ### Note : 
 - The sample mail and Usernames.txt files are present in the folder. Please modify/make use of these, but do not modify the names of these files. All types of mails are handled - multiple and single line mails, mails will length unequal to the block sizes of the encryption algorithms. 
