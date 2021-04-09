@@ -1,4 +1,4 @@
-### ASSIGNMENT 3 Network Security
+# ASSIGNMENT 3 Network Security
 
 This assignment is about facilitating client to client communication in an encrypted manner using a key distribution centre(KDC).
 
