@@ -172,12 +172,12 @@ def main():
 		if port<10000:
 			port = port + 10000 # ensures port number is 5 digit
 
-		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
-		s.bind((args.kdcip, port)) # binds to its own port number
+		s1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
+		s1.bind((args.kdcip, port)) # binds to its own port number
 
 		register_with_KDC(args.client_name, args.kdcip, args.kdcport, master_key_s, str(port))
 		print("Sleeps for 15 seconds...")
-		time.sleep(5)
+		time.sleep(15)
 		key_request(args.client_name, master_key_s, args.kdcip, args.kdcport, args.o, args.inputfile)
 
 	elif args.action=='R':
@@ -188,13 +188,14 @@ def main():
 		if port<10000:
 			port = port + 10000  
 
-		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)      
-		s.bind((args.kdcip, port)) # binds to its own port number
+		s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
+
+		s2.bind((args.kdcip, port)) # binds to its own port number
 
 		register_with_KDC(args.client_name, args.kdcip, args.kdcport, master_key_r, str(port))
 		print("Sleeps for 15 seconds...")
 		time.sleep(5)
-		receive_message(s, port, args.kdcip, args.o, args.outenc, master_key_r, args.client_name)
+		receive_message(s2, port, args.kdcip, args.o, args.outenc, master_key_r, args.client_name)
 
 
 if __name__ == '__main__':

@@ -139,7 +139,7 @@ def enable_KDC(port, outputfile, pwdfile):
 
 		except (KeyboardInterrupt, SystemExit):
 
-			print("Script done, output file is "+outputfile)
+			print("KDC has closed, output log file is "+outputfile)
 			sys.exit(1)
 
 
