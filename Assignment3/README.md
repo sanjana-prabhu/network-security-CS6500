@@ -1,4 +1,4 @@
-## ASSIGNMENT 3 Network Security
+### ASSIGNMENT 3 Network Security
 
 This assignment is about facilitating client to client communication in an encrypted manner using a key distribution centre(KDC).
 
@@ -24,7 +24,7 @@ In order to test the KDC-client system, follow the steps given below:
 Note that the encrypted message received by the receiver will be stored in outenc.txt and the decrypted version of the same will be stored in outfile.txt.
 
 
-## The following is a sample session for testing out the code:
+### The following is a sample session for testing out the code:
 
 Terminal Window 1: ```$ python kdc.py -p 12345 -o output.txt -f pwd.txt```
 
@@ -35,7 +35,7 @@ Terminal Window 3: ```$ python client.py -n bob -m R -s outenc.txt -o outfile.tx
 After these three steps, in about 5-10 seconds, the message is sent via TCP sockets from the sender to the receiver and the commands in Terminal Windows 2 and 3 finish executing. Now, press Ctrl+C in Terminal Window 1 in order to stop the kdc.py execution. This will generate the log of the entire session in the output.txt file. If you wish to send another message between the same or different clients, you may do so(before Ctrl+C). These activities will also get updated in the log.
 
 
-## Note : 
+### Note : 
 
 - Steps 3 and 4 can be performed in any order(after Steps 1 and 2), but, if you perform Step 3 first, just ensure that Step 4 is executed within 5 seconds of entering the previous command so as to avoid issues due to the finite sleep time of the clients and the fact that registration, key request and sending the message is done in the same script. However, for convenience, you can do this: Perform Steps 1, 2 and 4 in that order. After this, you can perform Step 3 at your own convenience. 
 
