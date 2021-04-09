@@ -4,7 +4,7 @@ This assignment is about facilitating client to client communication in an encry
 
 
 ### Dependencies :
-- cryptography>=3.46
+- cryptography>=3.4.6
 
 In order to test the KDC-client system, follow the steps given below:
 
