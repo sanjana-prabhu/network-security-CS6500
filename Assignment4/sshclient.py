@@ -7,29 +7,78 @@ import sys
 import base64
 import hashlib
 import time
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import AES, PKCS1_OAEP
 from utils import *
 
-def connect_to_server(port_number):
+def user_input_interface(port_number, username, session_key):
+
+	print("Welcome! You may enter any of the following commands at the Client Promt.")
+	print("")
+
+	while True:
+
+		try:
+			command = input("<Client Prompt>")
+			network_interface(command, port_number, username, session_key)
+
+		except (KeyboardInterrupt, SystemExit):
+
+			print("Client has logged out.")
+			sys.exit(1)
+		
+
+def network_interface(command, port_number, username, session_key):
 
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect(("localhost", int(port_number)))
-	data = s.recv(1024) 
-	server_pubkey = data.decode('utf-8')
-	f = open('server_pub.txt', 'wb')
-	f.write(server_pubkey)
+	
+	encr_message = encrypt(command, session_key)
+	s.sendall(b'|302|'+encr_message)
 
+	data = s.recv(1024)
+	data = decrypt(data, session_key).decode('utf-8')
+	print(data)
+	if data=='Logged out.':
+		sys.exit(1)
 	s.close()
 
-def authenticate_to_server(port_number, username, database):
 
-	session_key = os.random(32)
-	passphrase = database[username]
-	message = username + passphrase + session_key
+def connect_to_server(port_number, username):
 
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect(("localhost", int(port_number)))
+	message = '|300|'
 	s.sendall(bytes(message, 'utf-8'))
+	data = s.recv(1024) 
+	f = open('server_pub.txt', 'wb')
+	f.write(data)
+	f.close()
+	authenticate_to_server(s, port_number, username)
+
+
+def authenticate_to_server(s, port_number, username):
+
+	session_key = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(32))
+	passphrase = input("Enter the password")
+	message = username + passphrase + session_key
+	message = bytes(message, 'utf-8')
+	public_key = RSA.import_key(open("server_pub.txt").read())
+	cipher_rsa = PKCS1_OAEP.new(public_key)
+	message = cipher_rsa.encrypt(message)
+
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.connect(("localhost", int(port_number)))
+	s.sendall(b'|301|'+message)
+	data = s.recv(1024)
+	s.close()
+
+	if data.decode('utf-8')=='OK':
+		print("Successfully autheticated to server...")
+		user_input_interface(port_number, username, session_key)
+	else:
+		print("Authentication failed!")
+
 
 def main():
 
@@ -38,15 +87,7 @@ def main():
 	parser.add_argument(type=str, dest='client_name')
 	args = parser.parse_args()
 
-	pwd1 = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(16))
-	pwd2 = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(16))
-	pwd3 = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(16))
-
-	database = {'sanjana1': pwd1, 'sanjana2': pwd2, 'sanjana3': pwd3}
-
-	connect_to_server(args.port_number)
-
-	authenticate_to_server(args.port_number, args.client_name, database)
+	connect_to_server(args.port_number, args.client_name)
 
 
 
