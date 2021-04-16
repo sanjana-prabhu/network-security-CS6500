@@ -27,3 +27,20 @@ def encrypt(message, session_key):
 	nonce = cipher.nonce
 
 	return ciphertext+tag+nonce
+
+def path_convert(src, dest, filename):
+
+	if src=='../':
+		source_path = os.path.dirname(os.getcwd())+'/'
+	elif src=='/':
+		source_path = os.getcwd()+'/'
+	else:
+		source_path = os.getcwd()+'/'+src
+	if dest=='../':
+		dest_path = os.path.dirname(os.getcwd())+'/'
+	elif dest=='/':
+		dest_path = os.getcwd()+'/'
+	else:
+		dest_path = os.getcwd()+'/'+dest
+
+	return source_path, dest_path
