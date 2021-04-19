@@ -15,11 +15,6 @@ def register_with_KDC(client_name, kdcip, kdcport, key, client_port_num):
 
 	'''
 	sends the 301 message to KDC, hence registering the client with KDC
-	client_name : name of the client
-	kdcip : IP address of KDC(also the IP address of the client in this case)
-	kdcport : Port of which KDC listens
-	key : passphrase of the client
-	client_port_num : Port number of the client
 
 	'''
 
@@ -32,7 +27,7 @@ def register_with_KDC(client_name, kdcip, kdcport, key, client_port_num):
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect((kdcip, int(kdcport)))
 	s.sendall(bytes(message, 'utf-8'))
-	data = s.recv(1024) # receives the 302 message from KDC
+	data = s.recv(1024) 
 	s.close()
 	print("Contacts KDC and registers...")
 
@@ -42,32 +37,29 @@ def send_message_to_client(data, master_key, message, client_name):
 	'''
 	function invoking client to client communication between 
 	sender and receiver
-	data : message received by the sender from the KDC(306 message)
-	master_key : passphrase of the sender
-	client_name : name/ID of the sender
 
 	'''
 
 	encrypted_ticket_s = data[5:133].decode('utf-8') 
 	salt = client_name + master_key
-	key = hashlib.md5(salt.encode('utf-8')).digest() # generating 128 bit master key from passphrase
-	iv = hashlib.md5(client_name.encode('utf-8')).digest() # IV for KDC-client communication is generated using client name as salt
-	decrypted_ticket = unpad(decrypt(encrypted_ticket_s, key, iv)) # decrypt to obtain the session key for C2C communication
+	key = hashlib.md5(salt.encode('utf-8')).digest()
+	iv = hashlib.md5(client_name.encode('utf-8')).digest() 
+	decrypted_ticket = unpad(decrypt(encrypted_ticket_s, key, iv)) 
 	secret_key = decrypted_ticket[:16]
-	iv_s = decrypted_ticket[16:32] # IV for C2C communication
+	iv_s = decrypted_ticket[16:32] 
 	ip_b = decrypted_ticket[68:77].decode('utf-8')
-	port_b = decrypted_ticket[77:82].decode('utf-8') # Port number of which receiver listens
+	port_b = decrypted_ticket[77:82].decode('utf-8') 
 
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Connect to the receiver
+	s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM) 
 	s.connect((ip_b, int(port_b)))
-	s.sendall(b'|309|'+data[133:]) # Send 309 message containing session key
+	s.sendall(b'|309|'+data[133:]) 
 	s.close()
 
 	encrypted_message = encrypt(message, secret_key, iv_s)
 
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect((ip_b, int(port_b)))
-	s.sendall(encrypted_message) # Send the encrypted message
+	s.sendall(encrypted_message) 
 	s.close()
 
 
@@ -76,12 +68,6 @@ def key_request(client_name, master_key, kdcip, kdcport, receiver_name, inputfil
 	'''
 	function which enables the clients to request the session key from KDC
 	for client to client communication
-	client_name : name of the sender
-	master_key : passphrase of sender
-	kdcip : IP address of KDC(also the IP address of the client in this case)
-	kdcport : Port of which KDC listens
-	receiver_name : name of the receiver
-	inputfile : file where the message is present
 
 	'''
 
@@ -91,23 +77,23 @@ def key_request(client_name, master_key, kdcip, kdcport, receiver_name, inputfil
 	nonce = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(12))
 	ticket = client_name_modified+receiver_name_modified+nonce
 	salt = client_name + master_key
-	key = hashlib.md5(salt.encode('utf-8')).digest() # generating 128 bit master key from passphrase
+	key = hashlib.md5(salt.encode('utf-8')).digest() 
 	iv = hashlib.md5(client_name.encode('utf-8')).digest()
 
-	encrypted_ticket = encrypt(ticket, key, iv) # encrypt ticket using master key of sender
-	message = message_i + encrypted_ticket.decode('utf-8') + client_name_modified # 305 message 
+	encrypted_ticket = encrypt(ticket, key, iv) 
+	message = message_i + encrypted_ticket.decode('utf-8') + client_name_modified
 
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-	s.connect((kdcip, int(kdcport))) # connect to KDC's port
+	s.connect((kdcip, int(kdcport))) 
 	s.sendall(bytes(message, 'utf-8'))
-	data = s.recv(1024) # contains 306 message sent by KDC
+	data = s.recv(1024) 
 	s.close()
 	print("Contacts KDC for secret key...")
 
 	tag = int(data[1:4].decode('utf-8'))
 	if tag==306:
 		message = inputfile.read()
-		send_message_to_client(data, master_key, message, client_name) # send message from sender to receiver
+		send_message_to_client(data, master_key, message, client_name) 
 		print("Quits after sending the file to",receiver_name)
 	
 
@@ -115,24 +101,20 @@ def receive_message(s, port, ip, outputfile, encr_out_file, master_key, client_n
 
 	'''
 	function which enables the receiver to receive the message from the sender
-	outputfile : file to store the decrypted message sent to receiver
-	encr_out_file : file to store the encrypted message sent to receiver
-	master_key : passphrase of the receiver
-	client_name : name/ID of the receiver
 
 	'''
 	fo = open(outputfile, 'w')
 
 	s.listen(5)
 	c, addr = s.accept()
-	data = c.recv(1024) # receives 309 message
+	data = c.recv(1024) 
 	tag = int((data[1:4]).decode('utf-8'))
 
 	if tag==309:
 
 		encrypted_ticket = data[5:]
 		salt = client_name + master_key
-		key = hashlib.md5(salt.encode('utf-8')).digest() # generating 128 bit master key from passphrase
+		key = hashlib.md5(salt.encode('utf-8')).digest() 
 		iv = hashlib.md5(client_name.encode('utf-8')).digest()
 		decrypted_ticket = unpad(decrypt(encrypted_ticket, key, iv))
 		secret_key = decrypted_ticket[:16]
@@ -142,7 +124,7 @@ def receive_message(s, port, ip, outputfile, encr_out_file, master_key, client_n
 		port_a = decrypted_ticket[77:82].decode('utf-8')
 
 		c2, addr = s.accept()
-		data = c2.recv(1024) # receives the actual message
+		data = c2.recv(1024) 
 		encr_out_file.write(data)
 
 		message = unpad(decrypt(data, secret_key, iv_s))
@@ -156,7 +138,7 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-n', type=str, dest='client_name')
 	parser.add_argument('-m', type=str, dest='action')
-	parser.add_argument('-o', type=str) #either receiver or encrypted output
+	parser.add_argument('-o', type=str) 
 	parser.add_argument('-i', type=argparse.FileType('r'), dest='inputfile')
 	parser.add_argument('-a', type=str, dest='kdcip')
 	parser.add_argument('-p', type=str, dest='kdcport')
@@ -168,12 +150,12 @@ def main():
 
 		master_key_s = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(12))
 		client_port_num = ''.join(random.choice(string.digits) for i in range(5))
-		port = int(client_port_num)%65536 # ensures port number is in 0-65536
+		port = int(client_port_num)%65536 
 		if port<10000:
-			port = port + 10000 # ensures port number is 5 digit
+			port = port + 10000 
 
 		s1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
-		s1.bind((args.kdcip, port)) # binds to its own port number
+		s1.bind((args.kdcip, port)) 
 
 		register_with_KDC(args.client_name, args.kdcip, args.kdcport, master_key_s, str(port))
 		print("Sleeps for 15 seconds...")
@@ -190,7 +172,7 @@ def main():
 
 		s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
 
-		s2.bind((args.kdcip, port)) # binds to its own port number
+		s2.bind((args.kdcip, port))
 
 		register_with_KDC(args.client_name, args.kdcip, args.kdcport, master_key_r, str(port))
 		print("Sleeps for 15 seconds...")

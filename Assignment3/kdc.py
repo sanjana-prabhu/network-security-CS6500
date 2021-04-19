@@ -13,9 +13,6 @@ def register_client(c, data, f):
 
 	'''
 	registers the client by storing its details in the password file
-	c : TCP connection with the client
-	data : data sent by the client for registration
-	f : password file
 
 	'''
 
@@ -56,10 +53,6 @@ def send_key(c, data, pwdfile):
 	'''
 	sends a session key for client to client communication to
 	the client requesting for the key
-	c : TCP connection with the client
-	data : data sent by the client for key request
-	f : password file
-	returns client name in order to update output file/KDC log
 
 	'''
 
@@ -107,9 +100,6 @@ def enable_KDC(port, outputfile, pwdfile):
 
 	'''
 	function to enable to KDC to listen on the specified IP and port number
-	port : KDC port number
-	outputfile : file to store the diagnostic outputs from the KDC
-	pwdfile : file to store password details of the clients
 
 	'''
 
