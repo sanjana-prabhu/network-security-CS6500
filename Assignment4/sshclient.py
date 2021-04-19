@@ -14,11 +14,12 @@ def user_input_interface(port_number, username, session_key):
 	print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 	print("| Welcome! You may enter any of the following commands at the Client Prompt. |")
 	print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-	print("|        pwd             |              prints the current working directory |")
-	print("|    cd directory        |      changes the directory to the directory given |") 
-	print("|        ls              |       lists the contents of the current directory |")  
+	print("|          pwd           |              prints the current working directory |")
+	print("|      cd directory      |      changes the directory to the directory given |") 
+	print("|          ls            |       lists the contents of the current directory |")  
 	print("| cp filename dir1 dir2  | copies the file called filename from dir1 to dir2 |")
 	print("| mv filename dir1 dir2  |  moves the file called filename from dir1 to dir2 |")
+	print("|        logout          |    client logs out of the server and program ends |")
 	print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
 	while True:
@@ -65,7 +66,7 @@ def connect_to_server(ip, port_number, username):
 def authenticate_to_server(s, port_number, username):
 
 	session_key = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(32))
-	password = input("Enter the password")
+	password = input("Enter the password: ")
 	passphrase = hashlib.md5(password.encode('utf-8')).digest()
 	message = bytes(username,'utf-8') + passphrase + bytes(session_key, 'utf-8')
 	public_key = RSA.import_key(open("server_pub.txt").read())
@@ -82,7 +83,7 @@ def authenticate_to_server(s, port_number, username):
 		print("Successfully authenticated to server...")
 		user_input_interface(port_number, username, session_key)
 	else:
-		print("Authentication failed!")
+		print("Authentication failed! Incorrect password!")
 
 
 def main():

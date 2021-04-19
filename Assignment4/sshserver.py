@@ -10,7 +10,7 @@ from Crypto.Cipher import AES, PKCS1_OAEP
 from utils import *
 from shutil import copyfile
 
-def network_interface(s, session_key, server_port, username, working_dir):
+def network_interface(s, session_key, server_port, username, working_dir): 
 
 	while True:
 
@@ -60,6 +60,7 @@ def initiate_client_connection(c, data):
 		if pt==b'0'*16:
 			message = "OK"
 			c.sendall(bytes(message, 'utf-8'))
+			print(username+" has successfully authenticated to server...")
 			return username, session_key
 		else:
 			message = "NOK"
@@ -124,7 +125,7 @@ def command_processor(plaintext, s, port_number, username):
 		
 	elif plaintext[:6]=='logout':
 
-		print("Client "+username+" has logged out.")
+		print(username+" has logged out.")
 		message = "Logged out."
 
 	else:
@@ -151,7 +152,6 @@ def update_password_file(): # creates server's pub and priv keys
 	f.close()
 
 
-
 def update_user_database():
 
 	if not os.path.isdir('UserCredentials'):
@@ -175,11 +175,12 @@ def update_user_database():
 		ct_bytes = cipher.encrypt(message)
 		iv = base64.b64encode(cipher.iv)
 		ct = base64.b64encode(ct_bytes)
-		
 		username = bytes(username+'\n', 'utf-8')
+
 		f.write(username)
 		f.write(iv + ct)
 		f.close()
+
 
 def get_session_key(s):
 
@@ -193,18 +194,20 @@ def get_session_key(s):
 
 	return session_key
 
+
 def start_server(s, port_number, working_dir):
 
-	os.chdir(working_dir)
+	os.chdir(working_dir) # restores working directory
 	start = True
 	while start:
-		username, session_key = get_session_key(s)
+		username, session_key = get_session_key(s) 
 		if session_key==-1:
 			start = True
 		else:
-			start = False
+			start = False # starts network interface if client is authenticated
 	
 	network_interface(s, session_key, port_number, username, working_dir)
+
 
 def main():
 
