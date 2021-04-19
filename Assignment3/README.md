@@ -20,7 +20,7 @@ In order to test the KDC-client system, follow the steps given below:
   ```
 - To register the receiver client and make it listen to the messages(on its port), enter the following command on the terminal:
   ```
-   python client.py -n bob -m R -s outenc.txt -o outfile.txt -a KDCIP -p KDCPortNumber
+   python client.py -n receivername -m R -s outenc.txt -o outfile.txt -a KDCIP -p KDCPortNumber
   ```
 Note that the encrypted message received by the receiver will be stored in outenc.txt and the decrypted version of the same will be stored in outfile.txt.
 
