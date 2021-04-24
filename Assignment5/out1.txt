@@ -1,0 +1,41 @@
+	Pkt num: 1 matches no rule
+	Pkt num: 2 matches rule num: 1
+	Pkt num: 3 matches rule num: 2
+	Pkt num: 4 matches rule num: 2
+	Pkt num: 5 matches rule num: 2
+	Pkt num: 6 matches no rule
+	Pkt num: 7 matches rule num: 3
+	Pkt num: 8 matches rule num: 3
+	Pkt num: 9 matches no rule
+	Pkt num: 10 matches no rule
+	Pkt num: 11 matches no rule
+	Pkt num: 12 matches rule num: 4
+	Pkt num: 13 matches no rule
+	Pkt num: 14 matches no rule
+	Pkt num: 15 matches rule num: 5
+	Pkt num: 16 matches rule num: 5
+	Pkt num: 17 matches rule num: 5
+	Pkt num: 18 matches rule num: 5
+	Pkt num: 19 matches rule num: 5
+	Pkt num: 20 matches rule num: 6
+	Pkt num: 21 matches no rule
+	Pkt num: 22 matches rule num: 6
+	Pkt num: 23 matches rule num: 6
+	Pkt num: 24 matches no rule
+	Pkt num: 25 matches rule num: 6
+	Pkt num: 26 matches rule num: 7
+	Pkt num: 27 matches no rule
+	Pkt num: 28 matches no rule
+	Pkt num: 29 matches rule num: 8
+	Pkt num: 30 matches rule num: 8
+	Pkt num: 31 matches rule num: 8
+	Pkt num: 32 matches no rule
+	Pkt num: 33 matches no rule
+	Pkt num: 34 matches rule num: 9
+	Pkt num: 35 matches rule num: 9
+	Pkt num: 36 matches rule num: 9
+	Pkt num: 37 matches rule num: 9
+	Pkt num: 38 matches rule num: 10
+	Pkt num: 39 matches rule num: 10
+	Pkt num: 40 matches rule num: 10
+	Pkt num: 41 matches no rule
